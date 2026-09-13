@@ -143,6 +143,25 @@
   .ended-form-panel .sub{margin-bottom:26px;}
   .ended-form-panel .btn{display:inline-flex;}
 
+  .success-form-panel{text-align:center;}
+  .success-icon{
+    width:64px; height:64px; margin:0 auto 22px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--gold-2), var(--gold-1));
+    color:#171307;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 16px 40px -14px rgba(212,175,55,.55);
+  }
+  .success-form-panel h2{margin-bottom:12px;}
+  .success-form-panel .sub{margin-bottom:0;}
+
+  .form-error{
+    display:none;
+    margin-top:16px; text-align:center;
+    font-size:.85rem; color:#e8a0a0;
+  }
+  .form-error a{color:var(--gold-2); text-decoration:underline;}
+
   /* card visual */
   .card-stage{
     position:relative;
@@ -465,7 +484,6 @@
 
         <input type="text" name="_gotcha" class="hidden-field" tabindex="-1" autocomplete="off">
         <input type="hidden" name="_subject" value="درخواست کارت طلایی RimNova - روز برنامه‌نویس">
-        <input type="hidden" name="_next" value="thanks.html">
 
         <div class="field">
           <label for="name">نام و نام خانوادگی <span class="req">*</span></label>
@@ -488,9 +506,24 @@
           <textarea id="message" name="پیام" placeholder="اگه نکته‌ای هست بنویس..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-gold">ارسال درخواست</button>
+        <button type="submit" class="btn btn-gold" id="submit-btn">ارسال درخواست</button>
         <p class="form-note">این کمپین محدوده به تعداد و تا پایان مهلت اعلام‌شده</p>
+        <p class="form-error" id="form-error-msg" style="display:none;">
+          مشکلی توی ارسال پیش اومد. دوباره امتحان کن یا مستقیم به
+          <a href="mailto:rimnoova@gmail.com">rimnoova@gmail.com</a> پیام بده.
+        </p>
       </form>
+
+      <div class="form-panel success-form-panel" id="form-success-panel" style="display:none;">
+        <div class="success-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>درخواستت با موفقیت ثبت شد</h2>
+        <p class="sub">
+          ممنون که درخواست دادی. تیم ریم‌نووا پروفایل گیت‌هابت رو بررسی می‌کنه و از طریق
+          شماره یا ایمیلی که وارد کردی باهات در تماسه.
+        </p>
+      </div>
 
       <div class="form-panel ended-form-panel" id="form-ended-panel" style="display:none;">
         <div class="ended-icon">
@@ -596,6 +629,35 @@
   }
   tick();
   setInterval(tick, 1000);
+
+  // Submit the form via AJAX so the person never leaves this page
+  var requestForm = document.getElementById('request-form');
+  requestForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var form = e.target;
+    var btn = document.getElementById('submit-btn');
+    var errorMsg = document.getElementById('form-error-msg');
+    errorMsg.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'در حال ارسال...';
+
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    }).then(function(response){
+      if(response.ok){
+        form.style.display = 'none';
+        document.getElementById('form-success-panel').style.display = 'block';
+      } else {
+        throw new Error('submit failed');
+      }
+    }).catch(function(){
+      btn.disabled = false;
+      btn.textContent = 'ارسال درخواست';
+      errorMsg.style.display = 'block';
+    });
+  });
 </script>
 
 </body>
